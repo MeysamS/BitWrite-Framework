@@ -1,0 +1,38 @@
+using Ardalis.GuardClauses;
+using Bw.Core.Persistence;
+using Npgsql;
+using System.Data;
+using System.Data.Common;
+
+namespace Bw.Persistence.EfCore.Postgres;
+
+public class NpgsqlConnectionFactory : IConnectionFactory
+{
+    private readonly string _connectionString;
+    private DbConnection? _connection;
+
+    public NpgsqlConnectionFactory(string connectionString)
+    {
+        Guard.Against.NullOrEmpty(connectionString);
+        _connectionString = connectionString;
+    }
+
+    public void Dispose()
+    {
+        if (_connection is { State: ConnectionState.Open })
+            _connection.Dispose();
+    }
+
+    public async Task<DbConnection> GetOrCreateConnection()
+    {
+        if (_connection is null || _connection.State != ConnectionState.Open)
+        {
+            _connection = new NpgsqlConnection(_connectionString);
+            await _connection.OpenAsync();
+        }
+
+        return _connection;
+    }
+
+
+}

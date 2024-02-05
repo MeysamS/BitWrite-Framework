@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.9.0" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<!--https://github.com/dotnet/aspnetcore/issues/19481-->
+		<!--https://docs.microsoft.com/en-us/aspnet/core/fundamentals/metapackage-app-->
+		<!--https://docs.microsoft.com/en-us/aspnet/core/fundamentals/target-aspnetcore-->
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+</Project>
