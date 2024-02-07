@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="EasyCaching.Core" Version="1.8.0" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.8.0" />
+    <PackageReference Include="EasyCaching.Redis" Version="1.8.0" />
+    <PackageReference Include="EasyCaching.Serialization.Json" Version="1.8.0" />
+    <PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.8.0" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bw.Cqrs\Bw.Cqrs.csproj" />
+    <ProjectReference Include="..\Extensions\Bw.Extensions.Microsoft.DependencyInjection\Bw.Extensions.Microsoft.DependencyInjection.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

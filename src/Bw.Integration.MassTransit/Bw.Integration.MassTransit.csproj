@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Humanizer" Version="2.14.1" />
+    <PackageReference Include="MassTransit" Version="8.1.0" />
+	  <PackageReference Include="MassTransit.RabbitMQ" Version="8.1.0" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bw.Logging\Bw.Logging.csproj" />
+    <ProjectReference Include="..\Bw.Messaging\Bw.Messaging.csproj" />
+    <ProjectReference Include="..\Bw.Validation\Bw.Validation.csproj" />
+    <ProjectReference Include="..\Extensions\Bw.Extensions.Collection\Bw.Extensions.Collection.csproj" />
+    <ProjectReference Include="..\Extensions\Bw.Extensions.Microsoft.DependencyInjection\Bw.Extensions.Microsoft.DependencyInjection.csproj" />
+  </ItemGroup>
+
+</Project>
