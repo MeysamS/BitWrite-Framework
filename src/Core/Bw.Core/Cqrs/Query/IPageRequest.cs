@@ -1,5 +1,3 @@
-using Bw.Core.Cqrs;
-
 namespace Bw.Core.Cqrs.Query;
 
 public interface IPageRequest

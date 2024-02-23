@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Sic.Xamin.Security;
+namespace Bw.Security;
 
 public class ForbiddenProblemDetails : ProblemDetails
 {

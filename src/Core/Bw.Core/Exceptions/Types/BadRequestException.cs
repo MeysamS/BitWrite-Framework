@@ -1,4 +1,3 @@
-using Bw.Core.Exceptions;
 using System.Net;
 
 namespace Bw.Core.Exceptions.Types;

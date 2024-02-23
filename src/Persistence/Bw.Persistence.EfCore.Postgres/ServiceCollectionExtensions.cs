@@ -2,6 +2,7 @@ using Ardalis.GuardClauses;
 using Bw.Core.Domain.Event;
 using Bw.Core.Domain.Event.Internal;
 using Bw.Core.Domain.Model.Aggregate;
+using Bw.Core.Domain.Model.Entity;
 using Bw.Core.Persistence;
 using Bw.Extensions.Microsoft.DependencyInjection;
 using Bw.Persistence.EFCore;
