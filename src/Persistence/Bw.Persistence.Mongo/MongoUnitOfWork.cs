@@ -3,13 +3,12 @@ using Bw.Persistence.Mongo.Abstraction;
 
 namespace Bw.Persistence.Mongo;
 
-public class MongoUnitOfWork<TContext> : IMongoUnitOfWork<TContext>, ITransactionAble
-    where TContext : MongoDbContext
+public class MongoUnitOfWork(IMongoDbContext mongoDbContext) : IMongoUnitOfWork, ITransactionAble    
 {
-    public MongoUnitOfWork(TContext context) => Context = context;
 
-    public TContext Context { get; }
+    public IMongoDbContext Context => mongoDbContext;
 
+  
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         await Context.SaveChangesAsync(cancellationToken);

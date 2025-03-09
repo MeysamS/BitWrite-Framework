@@ -49,7 +49,7 @@ public static class CQRSRegistrationExtensions
         services.Add<ICommandProcessor, CommandProcessor>(serviceLifetime)
           .Add<IQueryProcessor, QueryProcessor>(serviceLifetime)
           .Add<IEventProcessor, EventProcessor>(serviceLifetime)
-          .Add<ICommandScheduler, NullCommandScheduler>(serviceLifetime)
+          .Add<ICommandScheduler, PersistanceCommandScheduler>(serviceLifetime)
           .Add<IDomainEventPublisher, DomainEventPublisher>(serviceLifetime)
           .Add<IDomainNotificationEventPublisher, DomainNotificationEventPublisher>(serviceLifetime);
         services.AddDomain();

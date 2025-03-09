@@ -2,6 +2,5 @@
 
 namespace Bw.Persistence.Mongo.Abstraction;
 
-public interface IMongoUnitOfWork<out TContext> : IUnitOfWork<TContext>
-    where TContext : class, IMongoDbContext
+public interface IMongoUnitOfWork : IUnitOfWork<IMongoDbContext>    
 { }

@@ -1,4 +1,4 @@
-﻿namespace BitWrite.Cqrs;
+﻿namespace Bw.Core.BaseModel;
 
 public interface IResult
 {

@@ -17,4 +17,5 @@ public interface IReadRepository<TEntity, in TId>
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+
 }

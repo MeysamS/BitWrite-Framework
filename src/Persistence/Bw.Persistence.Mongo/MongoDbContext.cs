@@ -15,11 +15,10 @@ public class MongoDbContext : IMongoDbContext, ITxDbContextExecution
 
     protected readonly IList<Func<Task>> _commands;
 
-    [Obsolete]
     public MongoDbContext(IOptions<MongoOptions> options)
     {
         // Set Guid to CSharp style (with dash -)
-        BsonDefaults.GuidRepresentation = GuidRepresentation.CSharpLegacy;
+        //BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
         RegisterConventions();
 
@@ -60,13 +59,21 @@ public class MongoDbContext : IMongoDbContext, ITxDbContextExecution
         if (Session is { IsInTransaction: true })
         {
             await Session.CommitTransactionAsync(cancellationToken);
+            Session.Dispose();
+            Session = null;
         }
     }
 
     public void Dispose()
     {
-        while (Session is { IsInTransaction: true })
-            Thread.Sleep(TimeSpan.FromMilliseconds(100));
+        if (Session is { IsInTransaction: true })
+        {
+            Session.AbortTransaction();
+        }
+
+        Session?.Dispose();
+        Session = null;
+
         GC.SuppressFinalize(this);
     }
 
@@ -76,13 +83,17 @@ public class MongoDbContext : IMongoDbContext, ITxDbContextExecution
         try
         {
             await action();
-
             await CommitTransactionAsync(cancellationToken);
         }
         catch
         {
             await RollbackTransaction(cancellationToken);
             throw;
+        }
+        finally
+        {
+            Session?.Dispose();
+            Session = null;
         }
     }
 
@@ -92,9 +103,7 @@ public class MongoDbContext : IMongoDbContext, ITxDbContextExecution
         try
         {
             var result = await action();
-
             await CommitTransactionAsync(cancellationToken);
-
             return result;
         }
         catch
@@ -102,7 +111,13 @@ public class MongoDbContext : IMongoDbContext, ITxDbContextExecution
             await RollbackTransaction(cancellationToken);
             throw;
         }
+        finally
+        {
+            Session?.Dispose();
+            Session = null;
+        }
     }
+
 
     public IMongoCollection<T> GetCollection<T>(string? name = null)
         => Database.GetCollection<T>(name ?? typeof(T).Name.ToLower());
@@ -111,34 +126,50 @@ public class MongoDbContext : IMongoDbContext, ITxDbContextExecution
 
     public async Task RollbackTransaction(CancellationToken cancellationToken = default)
     {
-        await Session?.AbortTransactionAsync(cancellationToken)!;
+        if (Session is { IsInTransaction: true })
+        {
+            await Session.AbortTransactionAsync(cancellationToken);
+        }
     }
+
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = _commands.Count;
+        if (Session is null)
+        {
+            Session = await MongoClient.StartSessionAsync(cancellationToken: cancellationToken);
+        }
 
-        using (Session = await MongoClient.StartSessionAsync(cancellationToken: cancellationToken))
+        if (!Session.IsInTransaction)
         {
             Session.StartTransaction();
-
-            try
-            {
-                var commandTasks = _commands.Select(c => c());
-
-                await Task.WhenAll(commandTasks);
-
-                await Session.CommitTransactionAsync(cancellationToken);
-            }
-            catch (Exception)
-            {
-                await Session.AbortTransactionAsync(cancellationToken);
-                _commands.Clear();
-                throw;
-            }
         }
+
+
+
+        try
+        {
+            var commandTasks = _commands.Select(c => c());
+
+            await Task.WhenAll(commandTasks);
+
+            await Session.CommitTransactionAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await Session.AbortTransactionAsync(cancellationToken);
+            _commands.Clear();
+            throw;
+        }
+
 
         _commands.Clear();
         return result;
+    }
+
+    public IClientSessionHandle? GetSession()
+    {
+        return Session;
     }
 }

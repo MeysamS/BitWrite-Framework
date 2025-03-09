@@ -6,6 +6,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 
+
 namespace Bw.Persistence.Mongo;
 
 public static class Extensions
@@ -15,15 +16,13 @@ public static class Extensions
     {
         services.AddValidatedOptions<MongoOptions>(nameof(MongoOptions));
 
-        BsonSerializer.RegisterSerializer(typeof(DateTime), DateTimeSerializer.LocalInstance);
-        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.CSharpLegacy));
 
-
+        RegisterConventions();
         services.AddScoped(typeof(TContext));
         services.AddScoped<IMongoDbContext>(sp => sp.GetRequiredService<TContext>()!);
 
-        services.AddTransient(typeof(IMongoRepository<,>), typeof(MongoRepository<,>));
-        services.AddTransient(typeof(IMongoUnitOfWork<>), typeof(MongoUnitOfWork<>));
+        services.AddScoped(typeof(IMongoRepository<,>), typeof(MongoRepository<,>));
+        services.AddScoped<IMongoUnitOfWork, MongoUnitOfWork>();
 
         return services;
 
@@ -37,7 +36,7 @@ public static class Extensions
         ConventionRegistry.Register("conventions",
             new ConventionPack
             {
-                  new CamelCaseElementNameConvention(),
+                new CamelCaseElementNameConvention(),
                 new IgnoreExtraElementsConvention(true),
                 new EnumRepresentationConvention(BsonType.String),
                 new IgnoreIfDefaultConvention(false),
@@ -45,5 +44,9 @@ public static class Extensions
             },
             _ => true
             );
+
+        BsonSerializer.RegisterSerializer(typeof(DateTime), DateTimeSerializer.LocalInstance);
+        BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Bw.Core.Domain.Model.Identity;
 using Bw.Core.Persistence;
+using MongoDB.Driver.Linq;
 
 namespace Bw.Persistence.Mongo.Abstraction;
 

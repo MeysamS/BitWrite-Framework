@@ -10,4 +10,6 @@ public interface IMongoDbContext : IDisposable
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
     Task RollbackTransaction(CancellationToken cancellationToken = default);
     void AddCommand(Func<Task> func);
+    IClientSessionHandle? GetSession();
+
 }

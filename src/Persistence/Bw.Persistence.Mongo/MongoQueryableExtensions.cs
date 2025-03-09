@@ -91,4 +91,21 @@ public static class MongoQueryableExtensions
         return data;
     }
 
+    public static async Task<ListResultModel<T>> ApplyPagingAsync<T>(
+        this IQueryable<T> collection,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+        where T : notnull
+    {
+        if (collection is IMongoQueryable<T> mongoQueryable)
+        {
+            return await mongoQueryable.ApplyPagingAsync(page, pageSize, cancellationToken);
+        }
+        else
+        {
+            throw new NotSupportedException("این متد فقط برای MongoDB queryable پشتیبانی می‌شود.");
+        }
+    }
+
 }

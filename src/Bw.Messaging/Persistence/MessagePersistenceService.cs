@@ -127,27 +127,74 @@ public class MessagePersistenceService : IMessagePersistenceService
         {
             id = Guid.NewGuid();
         }
-
+        var messageType = messageEnvelope.Message != null
+            ? TypeMapper.GetFullTypeName(messageEnvelope.Message.GetType())
+            : "Unknown";
+            
         await _messagePersistenceRepository.AddAsync(
             new StoreMessage(
                 id,
-                TypeMapper.GetFullTypeName(messageEnvelope.Message!.GetType()),
+                messageType,
                 _messageSerializer.Serialize(messageEnvelope),
                 deliveryType), cancellationToken
                 );
 
         _logger.LogInformation(
-            "Message with id: {MessageID} and delivery type: {DeliveryType} saved in persistence message store",
+            "Message with id: {MessageID}, type: {MessageType} and delivery type: {DeliveryType} saved in persistence message store",
             id,
+            messageEnvelope.Message!.GetType().FullName,
             deliveryType.ToString()
         );
 
+
     }
 
-    private Task ProcessInbox(StoreMessage message, CancellationToken cancellationToken)
+    private async Task ProcessInbox(StoreMessage message, CancellationToken cancellationToken)
     {
-        // TODO Contribution mehdi , meysam , hadi
-        return Task.CompletedTask;
+        MessageEnvelope? messageEnvelope = _messageSerializer.Deserialize<MessageEnvelope>(message.Data, true);
+        if (messageEnvelope is null || messageEnvelope.Message is null)
+            return;
+
+        var data = _messageSerializer.Deserialize(
+            messageEnvelope.Message.ToString()!,
+            TypeMapper.GetType(message.DataType)
+        );
+        if (data is null)
+        {
+            _logger.LogWarning("Failed to deserialize Inbox message with ID: {MessageId}", message.Id);
+            return;
+        }
+
+        switch (data)
+        {
+            case IDomainNotificationEvent domainNotificationEvent:
+                await _mediator.Publish(domainNotificationEvent, cancellationToken);
+                _logger.LogInformation(
+                    "Domain-Notification with ID: {EventID} processed from the Inbox",
+                    message.Id
+                );
+                break;
+
+            case IInternalCommand internalCommand:
+                await _mediator.Send(internalCommand, cancellationToken);
+                _logger.LogInformation(
+                    "InternalCommand with ID: {CommandID} processed from the Inbox",
+                    message.Id
+                );
+                break;
+
+            case IMessage integrationMessage:
+                await _bus.PublishAsync(integrationMessage, messageEnvelope.Headers, cancellationToken);
+                _logger.LogInformation(
+                    "Integration message with ID: {MessageID} processed from the Inbox",
+                    message.Id
+                );
+                break;
+
+            default:
+                _logger.LogWarning("Unknown message type received in Inbox with ID: {MessageId}", message.Id);
+                break;
+        }
 
     }
 
